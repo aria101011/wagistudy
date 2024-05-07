@@ -1,3 +1,4 @@
+
 <!-- post/create.html -->
 <!DOCTYPE html>
 <html lang="en">
@@ -8,14 +9,15 @@
 </head>
 <body>
     <h1>Create Post</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data" action="{% url 'post:create' %}">
         {% csrf_token %}
         <label for="title">Title:</label><br>
         <input type="text" id="title" name="title"><br>
         <label for="content">Content:</label><br>
         <textarea id="content" name="content"></textarea><br>
+        <label for="images">Images:</label><br>
+        <input type="file" id="images" name="images" multiple><br>
         <button type="submit">Submit</button>
     </form>
 </body>
 </html>
-

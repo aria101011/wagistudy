@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'post',
 ]
 
@@ -52,10 +53,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'study.urls'
 
+import os
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),  # 기본 템플릿 디렉터리
+            os.path.join(BASE_DIR, 'post', 'templates'),  # 앱의 템플릿 디렉터리
+            os.path.join(BASE_DIR, 'rest_framework', 'templates'),  # rest_framework 템플릿 디렉터리 추가
+            ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

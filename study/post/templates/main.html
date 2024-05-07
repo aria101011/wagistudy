@@ -3,15 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Posts</title>
 </head>
 <body>
-    <button><a href="{% url 'create' %}">글 작성</a></button>
+    <h1>Posts</h1>
+    <button><a href="{% url 'post:create' %}">글 작성</a></button>
     <ul>
         {% for post in posts %}
-            <li><a href="{% url 'detail' post_id=post.id %}">{{ post.title }}</a></li>
+            <li>
+                <a href="{% url 'post:detail' post_id=post.pk %}">{{ post.title }}</a>
+                {% if post.postimage_set.all %}
+                    <ul>
+                        {% for image in post.postimage_set.all %}
+                            <li><img src="{{ image.image.url }}" alt="Image"></li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
         {% endfor %}
     </ul>
-    
 </body>
 </html>
