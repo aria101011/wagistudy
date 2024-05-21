@@ -1,61 +1,58 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PostForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import views as auth_views
+from .forms import PostForm, PostImageForm
 from .models import Post, PostImage
-from django.utils import timezone
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from .serializers import PostSerializer
-from rest_framework import viewsets
 
-# View for rendering main page with all posts
+# 게시물 관련 뷰
+def write(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        text = request.POST.get('text')
+        
+        post = Post.objects.create(
+            title=title,
+            text=text
+        )
+        images = request.FILES.getlist('image')
+        for img in images:
+            PostImage.objects.create(post=post, image=img)
+            
+        return redirect('main')
+    else:
+        return render(request, 'write.html')
+    
 def main(request):
     posts = Post.objects.all().order_by('-id')
     return render(request, 'main.html', {'posts': posts})
 
-# View for rendering post detail page
 def detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
-    return render(request, 'detail.html', {'post': post})
+    images = PostImage.objects.filter(post=post)
+    return render(request, 'detail.html', {'post': post, 'images': images})
 
-# View for creating a new post
-def create(request):
+# 계정 관련 뷰
+import pdb; pdb.set_trace()
+
+def signup(request):
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.created_at = timezone.now()
-            post.save()
-            images = request.FILES.getlist('images')
-            for image in images:
-                PostImage.objects.create(post=post, image=image)
-            return redirect('post:main')
+            user = form.save()
+            auth_login(request, user)
+            return redirect('home')
     else:
-        form = PostForm()
-    return render(request, 'post/create.html', {'form': form})
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
 
-# View for rendering list of posts (for REST API)
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+@login_required
+def home(request):
+    return render(request, 'home.html')
 
-# View for creating a new post (for REST API)
-@api_view(['POST'])
-def create_post(request):
-    serializer = PostSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# 로그인 뷰 (Django 기본 인증 뷰 사용)
+login_view = auth_views.LoginView.as_view(template_name='login.html')
 
-
-
-# post/views.py
-from django.shortcuts import render
-from rest_framework import generics
-from .models import Post
-from .serializers import PostSerializer
-
-class PostCreateView(generics.CreateAPIView):
-    queryset = Post.objects.all()
-    serializer_class = PostSerializer
+# 로그아웃 뷰 (Django 기본 인증 뷰 사용)
+logout_view = auth_views.LogoutView.as_view()

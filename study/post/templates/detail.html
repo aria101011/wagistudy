@@ -7,7 +7,14 @@
 </head>
 <body>
     <p>제목: {{post.title}}</p>
-    <p>내용: {{post.content}}</p>
+    <p>내용: {{post.text}}</p>
+    {% if images %}
+        <ul>
+            {% for image in images %}
+                <li><img src="{{ image.image.url }}" alt="Image"></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
     
     <button><a href="{% url 'main' %}">목록으로</a></button>
 </body>

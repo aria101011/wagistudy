@@ -1,0 +1,10 @@
+<ul>
+    {% if user.is_authenticated %}
+        <!-- 로그인 상태인 경우 -->
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+    {% else %}
+        <!-- 로그인 상태가 아닌 경우 -->
+        <li><a href="{% url 'login' %}">Login</a></li>
+    {% endif %}
+    <li><a href="{% url 'admin:index' %}">Admin</a></li>
+</ul>

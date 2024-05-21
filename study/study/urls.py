@@ -14,7 +14,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-# study/urls.py
 from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
@@ -22,8 +21,5 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('post/', include('post.urls')),
-]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('', include('post.urls')),  # 'post.urls'가 올바르게 포함되어야 합니다.
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
