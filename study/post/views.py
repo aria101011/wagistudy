@@ -1,31 +1,44 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import views as auth_views
-from .forms import PostForm, PostImageForm
+from .forms import PostForm
 from .models import Post, PostImage
+from account.views import signup
 
-# 게시물 관련 뷰
+
+
+# post/views.py
+from django.shortcuts import render
+from account.views import signup
+
+def my_post_view(request):
+    # 이 뷰에서 account 앱의 signup 뷰를 사용할 수 있습니다.
+    # signup 뷰를 직접 호출하는 것이 아니라 필요한 로직을 호출하거나 리다이렉트할 수 있습니다.
+    return render(request, 'signup.html')
+
+
+
+@login_required
 def write(request):
     if request.method == 'POST':
-        title = request.POST.get('title')
-        text = request.POST.get('text')
-        
-        post = Post.objects.create(
-            title=title,
-            text=text
-        )
-        images = request.FILES.getlist('image')
-        for img in images:
-            PostImage.objects.create(post=post, image=img)
-            
-        return redirect('main')
+        form = PostForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user  # 현재 로그인한 사용자를 작성자로 설정
+            post.save()
+            images = request.FILES.getlist('image')
+            for img in images:
+                PostImage.objects.create(post=post, image=img)
+            return redirect('main')
     else:
-        return render(request, 'write.html')
-    
+        form = PostForm()
+    return render(request, 'write.html', {'form': form})
+
 def main(request):
-    posts = Post.objects.all().order_by('-id')
+    if request.user.is_authenticated:
+        # 현재 로그인한 사용자의 작성한 글만 가져옴
+        posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    else:
+        posts = Post.objects.all().order_by('-created_at')
     return render(request, 'main.html', {'posts': posts})
 
 def detail(request, post_id):
@@ -33,26 +46,10 @@ def detail(request, post_id):
     images = PostImage.objects.filter(post=post)
     return render(request, 'detail.html', {'post': post, 'images': images})
 
-# 계정 관련 뷰
-import pdb; pdb.set_trace()
 
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            auth_login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+from django.shortcuts import render, redirect
+from account.views import signup  # account 앱의 signup 뷰를 import
 
-@login_required
-def home(request):
-    return render(request, 'home.html')
-
-# 로그인 뷰 (Django 기본 인증 뷰 사용)
-login_view = auth_views.LoginView.as_view(template_name='login.html')
-
-# 로그아웃 뷰 (Django 기본 인증 뷰 사용)
-logout_view = auth_views.LogoutView.as_view()
+def my_view(request):
+    # 필요한 로직 수행
+    return redirect(signup)  # account 앱의 signup 뷰로 리다이렉트

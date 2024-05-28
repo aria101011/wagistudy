@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'post',
+    'bootstrap4',
+    'account',
 ]
 
 MIDDLEWARE = [
@@ -58,7 +60,7 @@ import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'),  # 기본 템플릿 디렉터리
+        'DIRS': [os.path.join(BASE_DIR, 'account','templates'),  # 기본 템플릿 디렉터리
             os.path.join(BASE_DIR, 'post', 'templates'),  # 앱의 템플릿 디렉터리
             os.path.join(BASE_DIR, 'rest_framework', 'templates'),  # rest_framework 템플릿 디렉터리 추가
             ],
